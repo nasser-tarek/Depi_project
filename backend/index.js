@@ -16,9 +16,10 @@ const pool = new Pool({
 
 app.get('/api/hello', (req, res) => res.json({ message: 'Hello from backend' }));
 
-app.get('/api/items', async (req, res) => {
+// Notes API
+app.get('/api/notes', async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM items ORDER BY id');
+    const { rows } = await pool.query('SELECT * FROM notes ORDER BY id');
     res.json(rows);
   } catch (err) {
     console.error(err);
@@ -26,12 +27,23 @@ app.get('/api/items', async (req, res) => {
   }
 });
 
-app.post('/api/items', async (req, res) => {
-  const { name } = req.body;
-  if (!name) return res.status(400).json({ error: 'name required' });
+app.post('/api/notes', async (req, res) => {
+  const { title, body } = req.body;
+  if (!body) return res.status(400).json({ error: 'body required' });
   try {
-    const { rows } = await pool.query('INSERT INTO items (name) VALUES ($1) RETURNING *', [name]);
+    const { rows } = await pool.query('INSERT INTO notes (title, body) VALUES ($1, $2) RETURNING *', [title || null, body]);
     res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.delete('/api/notes/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM notes WHERE id = $1', [id]);
+    res.status(204).send();
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'db error' });
