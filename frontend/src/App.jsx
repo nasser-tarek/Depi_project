@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-const API = 'http://localhost:5000/api'; // keep as-is for local; change to '/api' if proxying
-
+const API = '/api';
 export default function App(){
   const [notes, setNotes] = useState([])
   const [title, setTitle] = useState('')
