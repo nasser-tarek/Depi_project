@@ -65,6 +65,7 @@ kubeconfig.yaml
 kubeconfig.yml
 secret-*.yaml
 *-secret.yaml
+depi-db-secret.yaml
 # Helm charts build output
 charts/**/tmp/
 charts/**/charts/
