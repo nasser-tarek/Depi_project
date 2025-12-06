@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_ORG = 'nasser1tarek'          // change if you want another org/user
+    DOCKERHUB_ORG = 'nasser1tarek'          
     BACKEND_IMAGE = "${DOCKERHUB_ORG}/depi_backend"
     FRONTEND_IMAGE = "${DOCKERHUB_ORG}/depi_frontend"
   }
@@ -18,7 +18,6 @@ pipeline {
     stage('Prepare tags') {
       steps {
         script {
-          // short commit hash and build number
           GIT_COMMIT_SHORT = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
           IMAGE_TAG = "${GIT_COMMIT_SHORT}"
           IMAGE_LATEST = "latest"
@@ -49,7 +48,6 @@ pipeline {
 
     stage('Login to Docker Hub') {
       steps {
-        // uses Jenkins credential with id 'docker-hub'
         withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
           sh 'echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin'
         }
@@ -83,7 +81,6 @@ pipeline {
 
   post {
     always {
-      // ensure logout for security
       sh 'docker logout || true'
       cleanWs()
     }
