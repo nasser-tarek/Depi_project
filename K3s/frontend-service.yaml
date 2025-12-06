@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: depi-frontend
+  namespace: depi
+spec:
+  selector:
+    app: depi-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: ClusterIP

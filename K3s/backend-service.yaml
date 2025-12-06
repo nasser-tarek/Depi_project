@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: depi-backend
+  namespace: depi
+spec:
+  selector:
+    app: depi-backend
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+  type: ClusterIP
