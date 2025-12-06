@@ -1,116 +1,136 @@
 import React, { useEffect, useState } from 'react'
 
-const API = '/api';
-export default function App(){
+function NoteRow({ note, onEditClick, onDelete }) {
+  return (
+    <div className="note-row">
+      <div className="note-title">{note.title}</div>
+      <div className="note-actions">
+        <button onClick={() => onEditClick(note)} className="btn">Edit</button>
+        <button onClick={() => onDelete(note.id)} className="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  )
+}
+
+export default function App() {
   const [notes, setNotes] = useState([])
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
-  // store id of expanded note (or null)
-  const [expandedId, setExpandedId] = useState(null)
+  const [editing, setEditing] = useState(null) // note object or null
+  const [form, setForm] = useState({ title: '', content: '' })
 
-  useEffect(()=>{ fetchNotes() }, [])
+  useEffect(() => {
+    loadNotes()
+  }, [])
 
-  async function fetchNotes(){
+  async function loadNotes() {
     setLoading(true)
+    setError(null)
     try {
-      const res = await fetch(`${API}/notes`)
+      const res = await fetch('/api/notes')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setNotes(data)
-    } catch (err) {
-      console.error('fetchNotes error', err)
+    } catch (e) {
+      setError(e.message)
     } finally {
       setLoading(false)
     }
   }
 
-  async function addNote(e){
-    e.preventDefault()
-    if (!body) return
+  function startCreate() {
+    setEditing({})
+    setForm({ title: '', content: '' })
+  }
+
+  function startEdit(note) {
+    setEditing(note)
+    setForm({ title: note.title || '', content: note.content || '' })
+  }
+
+  async function save() {
     try {
-      await fetch(`${API}/notes`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ title, body })
-      })
-      setTitle('')
-      setBody('')
-      fetchNotes()
-    } catch (err) {
-      console.error('addNote error', err)
+      const payload = { title: form.title, content: form.content }
+      let res
+      if (editing && editing.id) {
+        res = await fetch(`/api/notes/${editing.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+      } else {
+        res = await fetch('/api/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+      }
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`)
+      await loadNotes()
+      setEditing(null)
+    } catch (e) {
+      alert('Save error: ' + e.message)
     }
   }
 
-  async function deleteNote(id){
+  async function remove(id) {
     if (!confirm('Delete this note?')) return
     try {
-      await fetch(`${API}/notes/${id}`,{ method:'DELETE' })
-      // if deleted note was expanded, collapse
-      if (expandedId === id) setExpandedId(null)
-      fetchNotes()
-    } catch (err) {
-      console.error('deleteNote error', err)
+      const res = await fetch(`/api/notes/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error(`Delete failed ${res.status}`)
+      await loadNotes()
+    } catch (e) {
+      alert('Delete error: ' + e.message)
     }
-  }
-
-  function toggleExpand(id){
-    setExpandedId(prev => (prev === id ? null : id))
   }
 
   return (
-    <div className="app-container">
-      <h1>Notes — DevOps Test App</h1>
-      <p className="muted">Simple three-tier notes app for testing pipelines & deployments.</p>
-
-      <form onSubmit={addNote} className="note-form">
-        <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Title (optional)" />
-        <textarea value={body} onChange={e=>setBody(e.target.value)} placeholder="Write your note" />
-        <div style={{display:'flex', gap:8}}>
-          <button className="btn-primary">Add Note</button>
+    <div className="app">
+      <header>
+        <h1>Notes</h1>
+        <div className="controls">
+          <button onClick={startCreate} className="btn">New Note</button>
+          <button onClick={loadNotes} className="btn">Refresh</button>
         </div>
-      </form>
+      </header>
 
-      {loading ? <p className="muted">Loading...</p> : null}
+      {loading && <div className="status">Loading...</div>}
+      {error && <div className="status error">{error}</div>}
 
-      <ul className="note-list">
-        {notes.map(note=> {
-          const isOpen = expandedId === note.id
-          return (
-            <li key={note.id} className="note-card">
-              <div className="note-header">
-                <div style={{display:'flex', gap:12, alignItems:'center'}}>
-                  {/* expand icon button */}
-                  <button
-                    aria-label={isOpen ? 'Collapse note' : 'Expand note'}
-                    className="expand-btn"
-                    onClick={() => toggleExpand(note.id)}
-                    type="button"
-                  >
-                    {isOpen ? '▾' : '▸'}
-                  </button>
-
-                  <div>
-                    <div className="note-title">{note.title || 'Untitled'}</div>
-                    <div className="note-meta">{new Date(note.created_at).toLocaleString()}</div>
-                  </div>
-                </div>
-
-                <div>
-                  <button className="btn-danger" onClick={()=>deleteNote(note.id)}>Delete</button>
-                </div>
+      <div className="notes-list">
+        {notes.length === 0 && !loading && <div className="empty">No notes yet.</div>}
+        {notes.map(n => (
+          <div key={n.id} className="note-card">
+            <div className="note-card-inner">
+              <h3>{n.title}</h3>
+              <p>{n.content}</p>
+              <div className="note-actions-inline">
+                <button onClick={() => startEdit(n)} className="btn">Edit</button>
+                <button onClick={() => remove(n.id)} className="btn btn-danger">Delete</button>
               </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-              {/* note body only rendered when expanded */}
-              {isOpen && (
-                <div className="note-body" role="region" aria-live="polite">
-                  {note.body}
-                </div>
-              )}
-            </li>
-          )
-        })}
-      </ul>
+      {editing !== null && (
+        <div className="editor">
+          <h2>{editing.id ? 'Edit note' : 'New note'}</h2>
+          <label>Title</label>
+          <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+          <label>Content</label>
+          <textarea value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} />
+          <div className="editor-actions">
+            <button onClick={save} className="btn">Save</button>
+            <button onClick={() => setEditing(null)} className="btn">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <footer>
+        <small>DePi notes — edit feature</small>
+      </footer>
     </div>
   )
 }
