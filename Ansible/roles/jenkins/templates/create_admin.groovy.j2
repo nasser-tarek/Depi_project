@@ -1,0 +1,43 @@
+#!groovy
+import jenkins.model.*
+import hudson.security.*
+import hudson.util.Secret
+
+def instance = Jenkins.getInstance()
+
+def username = "{{ jenkins_admin_username }}"
+def password = "{{ jenkins_admin_password }}"
+def hudsonRealm = instance.getSecurityRealm()
+
+// If security realm is already HudsonPrivateSecurityRealm and user exists, do nothing
+def userAlreadyExists = false
+try {
+  def user = instance.getACL().getIdentity() // not reliable cross-version, fallback below
+} catch(all) {}
+
+// Robust check: if user exists in HudsonPrivateSecurityRealm
+def realm = instance.getSecurityRealm()
+if (realm instanceof HudsonPrivateSecurityRealm) {
+    def u = realm.getUser(username)
+    if (u != null) {
+        userAlreadyExists = true
+    }
+}
+
+// If no users exist (fresh Jenkins) or user not found, create user and set FullControlOnceLoggedInAuthorizationStrategy
+if (!userAlreadyExists) {
+    if (!(instance.getSecurityRealm() instanceof HudsonPrivateSecurityRealm)) {
+        def newRealm = new HudsonPrivateSecurityRealm(false)
+        instance.setSecurityRealm(newRealm)
+    }
+    instance.getSecurityRealm().createAccount(username, password)
+
+    def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+    strategy.setAllowAnonymousRead(false)
+    instance.setAuthorizationStrategy(strategy)
+
+    instance.save()
+    println("Created initial admin user: ${username}")
+} else {
+    println("Admin user ${username} already exists — skipping creation.")
+}

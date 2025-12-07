@@ -1,0 +1,8 @@
+---
+jenkins_port: 8080
+jenkins_version: ""        
+jenkins_repo_enabled: true
+java_package: null        
+create_admin_user: true
+jenkins_admin_username: "{{ jenkins_admin_username | default('admin') }}"
+jenkins_init_groovy_dir: /var/lib/jenkins/init.groovy.d

@@ -1,0 +1,13 @@
+---
+# roles/jenkins/handlers/main.yml
+
+- name: restart jenkins
+  ansible.builtin.systemd:
+    name: "{{ jenkins_service_name | default('jenkins') }}"
+    state: restarted
+
+- name: wait for jenkins
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ jenkins_port | default(8080) }}"
+    timeout: 120

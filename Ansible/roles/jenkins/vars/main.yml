@@ -1,0 +1,4 @@
+---
+# mapping per ansible_facts
+yum_java_pkg: java-11-amazon-corretto-devel
+apt_java_pkg: openjdk-11-jdk

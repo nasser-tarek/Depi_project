@@ -132,3 +132,11 @@ war/
 # ---------------------
 tmp/
 temp/
+
+*.vault
+*.key
+*.secret
+vault_pass.txt
+inventory.ini
+inventory/
+hosts

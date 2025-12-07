@@ -1,0 +1,102 @@
+---
+- name: Gather facts
+  ansible.builtin.setup:
+
+- name: Fail if not Debian/Ubuntu
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: "This role is configured to run on Debian-family (Ubuntu). Aborting."
+    success_msg: "Detected Debian-family OS (ok)."
+
+- name: Install prerequisite packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - unzip
+    state: present
+    update_cache: yes
+
+- name: Install Java (default OpenJDK 21 runtime)
+  ansible.builtin.shell: |
+    sudo apt install fontconfig openjdk-21-jre 
+    java -version
+
+
+- name: Ensure /usr/share/keyrings exists
+  file:
+    path: /usr/share/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Download Jenkins GPG key
+  ansible.builtin.get_url:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    dest: /tmp/jenkins.io.key
+    mode: '0644'
+  register: jenkins_key_download
+
+- name: Create dearmored keyring for Jenkins
+  ansible.builtin.command: "gpg --dearmor --yes --output /usr/share/keyrings/jenkins-archive-keyring.gpg /tmp/jenkins.io.key"
+  args:
+    creates: /usr/share/keyrings/jenkins-archive-keyring.gpg
+  register: dearmor_result
+  changed_when: dearmor_result.rc == 0
+
+- name: Remove temporary key file
+  file:
+    path: /tmp/jenkins.io.key
+    state: absent
+
+- name: Add Jenkins apt repo (signed-by keyring)
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/jenkins-archive-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/"
+    filename: jenkins
+    state: present
+
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  changed_when: false
+
+- name: Install Jenkins package
+  apt:
+    name: "{{ jenkins_package_name | default('jenkins') }}"
+    state: present
+
+- name: Ensure Jenkins service is enabled and started
+  service:
+    name: "{{ jenkins_service_name | default('jenkins') }}"
+    state: started
+    enabled: true
+  notify: wait for jenkins
+
+- name: Ensure init.groovy.d directory exists
+  file:
+    path: "{{ jenkins_init_groovy_dir | default('/var/lib/jenkins/init.groovy.d') }}"
+    state: directory
+    owner: "{{ jenkins_user | default('jenkins') }}"
+    group: "{{ jenkins_group | default('jenkins') }}"
+    mode: "0755"
+  when: create_admin_user | default(true)
+
+- name: Deploy groovy script to create admin user (idempotent)
+  template:
+    src: create_admin.groovy.j2
+    dest: "{{ jenkins_init_groovy_dir | default('/var/lib/jenkins/init.groovy.d') }}/02_create_admin_user.groovy"
+    owner: "{{ jenkins_user | default('jenkins') }}"
+    group: "{{ jenkins_group | default('jenkins') }}"
+    mode: "0644"
+  when: create_admin_user | default(true)
+  notify: restart jenkins
+
+- name: Print connection info
+  debug:
+    msg: "Jenkins should be reachable on port {{ jenkins_port | default(8080) }} (ensure EC2 security group allows it). Initial admin user: {{ jenkins_admin_username }}"

@@ -1,0 +1,9 @@
+---
+- name: Install and configure Jenkins on EC2
+  hosts: jenkins
+  become: true
+  vars_files:
+    - group_vars/jenkins.yml
+    - group_vars/vault.yml   # encrypted, contains secrets
+  roles:
+    - jenkins
