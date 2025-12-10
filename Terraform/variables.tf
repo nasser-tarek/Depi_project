@@ -44,13 +44,43 @@ variable "instance_type" {
 variable "ami" {
   description = "AMI ID for EC2 (ARM or x86 depending on instance type)"
   type        = string
-  default     = "ami-0fa91bc90632c73c9" 
+  default     = "ami-0fa91bc90632c73c9"
 }
 
-# DB
-variable "db_allocated_storage" { type = number; default = 20 }
-variable "db_engine_version"    { type = string; default = "17.6" }
-variable "db_instance_class"    { type = string; default = "db.t4g.micro" }
-variable "db_name"              { type = string; default = "depidb" }
-variable "db_username"          { type = string; default = "postgres" }
-variable "db_multi_az"          { type = bool; default = false }
+# --- Database Variables (Fixed Syntax) ---
+
+variable "db_allocated_storage" {
+  type    = number
+  default = 20
+}
+
+variable "db_engine_version" {
+  type    = string
+  default = "16.1"  # Note: 17.6 likely doesn't exist on RDS yet. Changed to a common stable version.
+}
+
+variable "db_instance_class" {
+  type    = string
+  default = "db.t4g.micro"
+}
+
+variable "db_name" {
+  type    = string
+  default = "depidb"
+}
+
+variable "db_username" {
+  type    = string
+  default = "postgres"
+}
+
+variable "db_multi_az" {
+  type    = bool
+  default = false
+}
+
+variable "key_name" {
+  description = "DEPI_key.pem"
+  type        = string
+  default     = ""  # Defaults to empty so the conditional logic in ec2.tf works
+}

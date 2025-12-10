@@ -2,7 +2,7 @@
 resource "random_password" "db" {
   length           = 20
   special          = true
-  override_characters = "!@#%&*()-_+=<>?"
+  override_special = "!@#%&*()-_+=<>?"
 }
 
 # Store password to Secrets Manager
@@ -37,7 +37,7 @@ resource "aws_db_instance" "depidb" {
   engine                  = "postgres"
   engine_version          = var.db_engine_version
   instance_class          = var.db_instance_class
-  name                    = var.db_name
+  db_name                 = var.db_name
   username                = var.db_username
   password                = random_password.db.result
   allocated_storage       = var.db_allocated_storage
