@@ -1,0 +1,6 @@
+---
+jenkins_package_name: jenkins
+jenkins_service_name: jenkins
+jenkins_user: jenkins
+jenkins_group: jenkins
+jenkins_home: /var/lib/jenkins

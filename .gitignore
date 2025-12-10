@@ -1,0 +1,142 @@
+# ---------------------
+# Global Security Rules
+# ---------------------
+*.pem
+*.key
+*.crt
+*.creds
+*.secret
+*.token
+*.p12
+*.pfx
+
+# AWS credentials accidentally created
+.aws/
+*.tfstate*
+*terraform.tfstate*
+*.tfvars
+*.tfvars.json
+*.tfplan
+*.tfbackend
+
+# Do not commit local environment variables
+.env
+.env.*
+!env.example     # allow clean example file
+
+# Sensitive output & dumps
+secrets/
+secret/
+credentials/
+creds/
+dump.sql
+*.sql
+*.db
+
+# ---------------------
+# Terraform
+# ---------------------
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# Local tf variables (do not push real ones)
+terraform.tfvars
+
+# ---------------------
+# Docker
+# ---------------------
+*.log
+docker-compose.override.yml
+docker-compose.local.yml
+docker-data/
+docker-volume/
+tmp/
+
+# ---------------------
+# Kubernetes
+# ---------------------
+*.kube/
+kubeconfig
+kubeconfig.yaml
+kubeconfig.yml
+secret-*.yaml
+*-secret.yaml
+depi-db-secret.yaml
+# Helm charts build output
+charts/**/tmp/
+charts/**/charts/
+
+# ---------------------
+# Node.js (frontend + backend)
+# ---------------------
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+dist/
+build/
+.cache/
+.eslintcache
+coverage/
+
+# Vite
+.vite/
+vite.config.local.js
+
+# ---------------------
+# Python (if used)
+# ---------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+
+# ---------------------
+# Logs
+# ---------------------
+*.log
+logs/
+*.out
+
+# ---------------------
+# OS / Editor junk
+# ---------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ---------------------
+# Jenkins
+# ---------------------
+# Jenkins stores secrets and jobs locally — never commit them
+jenkins_home/
+secrets/
+jobs/
+workspace/
+*.jpi
+war/
+
+# ---------------------
+# Misc
+# ---------------------
+tmp/
+temp/
+
+*.vault
+*.key
+*.secret
+vault_pass.txt
+inventory.ini
+inventory/
+hosts

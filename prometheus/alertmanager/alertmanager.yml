@@ -1,0 +1,10 @@
+route:
+  receiver: 'slack-alerts'
+receivers:
+  - name: 'slack-alerts'
+    slack_configs:
+
+      - send_resolved: true
+        api_url: ''
+        channel: '#alerts'
+        text: "🔥 *Alert:* {{ .CommonAnnotations.summary }}\n{{ .CommonAnnotations.description }}"
