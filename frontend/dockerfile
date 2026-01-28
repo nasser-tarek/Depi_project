@@ -16,7 +16,6 @@ RUN npm run build
 FROM nginxinc/nginx-unprivileged:stable-alpine AS runtime
 # nginx-unprivileged listens on 8080 by default and runs as a non-root user
 
-RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
