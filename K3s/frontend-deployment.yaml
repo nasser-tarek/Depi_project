@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: nasser1tarek/depi_frontend
+        image: 665063747160.dkr.ecr.eu-north-1.amazonaws.com/health-monitoring-frontend:v6
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
