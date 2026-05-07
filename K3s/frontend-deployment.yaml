@@ -5,31 +5,41 @@ metadata:
   namespace: depi
   labels:
     app: depi-frontend
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: depi-frontend
+
   template:
     metadata:
       labels:
         app: depi-frontend
+
     spec:
+      imagePullSecrets:
+        - name: ecr-registry-key
+
       containers:
-      - name: frontend
-        image: 665063747160.dkr.ecr.eu-north-1.amazonaws.com/health-monitoring-frontend:v8
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 80
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 3
-          periodSeconds: 10
+        - name: frontend
+          image: 665063747160.dkr.ecr.eu-north-1.amazonaws.com/health-monitoring-frontend:v8
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 80
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 20
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 10

@@ -5,59 +5,75 @@ metadata:
   namespace: depi
   labels:
     app: depi-backend
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: depi-backend
+
   template:
     metadata:
       labels:
         app: depi-backend
+
     spec:
+      imagePullSecrets:
+        - name: ecr-registry-key
+
       containers:
-      - name: backend
-        image: 665063747160.dkr.ecr.eu-north-1.amazonaws.com/health-monitoring-backend:v8
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 5000
-        env:
-        - name: PORT
-          value: "5000"
-        - name: POSTGRES_HOST
-          valueFrom:
-            secretKeyRef:
-              name: depi-db-secret
-              key: POSTGRES_HOST
-        - name: POSTGRES_PORT
-          valueFrom:
-            secretKeyRef:
-              name: depi-db-secret
-              key: POSTGRES_PORT
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: depi-db-secret
-              key: POSTGRES_USER
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: depi-db-secret
-              key: POSTGRES_PASSWORD
-        - name: POSTGRES_DB
-          valueFrom:
-            secretKeyRef:
-              name: depi-db-secret
-              key: POSTGRES_DB
-        readinessProbe:
-          httpGet:
-            path: /api/hello
-            port: 5000
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /api/hello
-            port: 5000
-          initialDelaySeconds: 15
-          periodSeconds: 20
+        - name: backend
+          image: 665063747160.dkr.ecr.eu-north-1.amazonaws.com/health-monitoring-backend:v8
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5000
+
+          env:
+            - name: PORT
+              value: "5000"
+
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: depi-db-secret
+                  key: POSTGRES_HOST
+
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: depi-db-secret
+                  key: POSTGRES_PORT
+
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: depi-db-secret
+                  key: POSTGRES_USER
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: depi-db-secret
+                  key: POSTGRES_PASSWORD
+
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: depi-db-secret
+                  key: POSTGRES_DB
+
+          readinessProbe:
+            httpGet:
+              path: /api/hello
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /api/hello
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
