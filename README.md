@@ -1,4 +1,4 @@
-# 📦 DEPI DevOps Graduation Project
+#  DEPI DevOps Graduation Project
 
 > A full end-to-end DevOps pipeline for a containerized Notes web application — from infrastructure provisioning on AWS to deployment on a Kubernetes cluster, with full CI/CD automation and observability.
 
@@ -22,7 +22,7 @@
 
 ---
 
-## 🚀 Project Overview
+##  Project Overview
 
 This project demonstrates a complete **DevOps workflow** for a **Notes CRUD Web Application**, covering:
 
